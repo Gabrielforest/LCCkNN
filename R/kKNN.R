@@ -50,7 +50,7 @@ sigmoid <- function( x, a = 1 ) { return( 1 / ( 1 + exp( -a * x ) ) ) }
 #'    k = initial_k
 #' )
 #'
-#' # Run the kK-NN classifier using the 'python' quantization method
+#' # Run the kK-NN classifier using the 'log2n' quantization method
 #' predictions_log2n <- kKNN::kKNN(
 #'    train = train_data,
 #'    test = test_data,
