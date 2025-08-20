@@ -4,7 +4,7 @@
 \alias{kKNN}
 \title{Adaptive k-Nearest Neighbor Classifier}
 \usage{
-kKNN(train, test, train_target, k, func = "log")
+kKNN(train, test, train_target, k, func = "log", quantize_method = "paper")
 }
 \arguments{
 \item{train}{A numeric matrix or data frame of the training data.}
@@ -16,6 +16,8 @@ kKNN(train, test, train_target, k, func = "log")
 \item{k}{The number of neighbors for the initial k-NN graph.}
 
 \item{func}{The transformation function for curvatures ('log', 'cubic_root', or 'sigmoid').}
+
+\item{quantize_method}{The quantization method to use: 'paper' (10 levels, default) or 'log2n' (k levels, where k = log2(n)).}
 }
 \value{
 A numeric or factor vector of predicted class labels for the test data.
@@ -45,21 +47,32 @@ train_labels <- target[train_index]
 # Determine initial k value as log2(n)
 initial_k <- round(log2(nrow(train_data)))
 if (initial_k \%\% 2 == 0) {
-  initial_k <- initial_k + 1
+   initial_k <- initial_k + 1
 }
 
-# Run the kK-NN classifier
-predictions <- kKNN::kKNN(
-  train = train_data,
-  test = test_data,
-  train_target = train_labels,
-  k = initial_k
+# Run the kK-NN classifier using the default quantization method ('paper')
+predictions_paper <- kKNN::kKNN(
+   train = train_data,
+   test = test_data,
+   train_target = train_labels,
+   k = initial_k
+)
+
+# Run the kK-NN classifier using the 'python' quantization method
+predictions_log2n <- kKNN::kKNN(
+   train = train_data,
+   test = test_data,
+   train_target = train_labels,
+   k = initial_k,
+   quantize_method = 'log2n'
 )
 
 # Evaluate the results (e.g., calculate balanced accuracy)
 test_labels <- target[-train_index]
-bal_acc <- kKNN::balanced_accuracy_score(test_labels, predictions)
-cat("Balanced Accuracy:", bal_acc, "\n")
+bal_acc_paper <- kKNN::balanced_accuracy_score(test_labels, predictions_paper)
+bal_acc_log2n <- kKNN::balanced_accuracy_score(test_labels, predictions_log2n)
+cat("Balanced Accuracy (paper Method):", bal_acc_paper, "\n")
+cat("Balanced Accuracy (log2n Method):", bal_acc_log2n, "\n")
 
 }
 \references{

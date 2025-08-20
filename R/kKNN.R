@@ -14,6 +14,7 @@ sigmoid <- function( x, a = 1 ) { return( 1 / ( 1 + exp( -a * x ) ) ) }
 #' @param train_target A numeric or factor vector of class labels for the training data.
 #' @param k The number of neighbors for the initial k-NN graph.
 #' @param func The transformation function for curvatures ('log', 'cubic_root', or 'sigmoid').
+#' @param quantize_method The quantization method to use: 'paper' (10 levels, default) or 'log2n' (k levels, where k = log2(n)).
 #' @return A numeric or factor vector of predicted class labels for the test data.
 #'
 #' @examples
@@ -38,27 +39,51 @@ sigmoid <- function( x, a = 1 ) { return( 1 / ( 1 + exp( -a * x ) ) ) }
 #' # Determine initial k value as log2(n)
 #' initial_k <- round(log2(nrow(train_data)))
 #' if (initial_k %% 2 == 0) {
-#'   initial_k <- initial_k + 1
+#'    initial_k <- initial_k + 1
 #' }
 #'
-#' # Run the kK-NN classifier
-#' predictions <- kKNN::kKNN(
-#'   train = train_data,
-#'   test = test_data,
-#'   train_target = train_labels,
-#'   k = initial_k
+#' # Run the kK-NN classifier using the default quantization method ('paper')
+#' predictions_paper <- kKNN::kKNN(
+#'    train = train_data,
+#'    test = test_data,
+#'    train_target = train_labels,
+#'    k = initial_k
+#' )
+#'
+#' # Run the kK-NN classifier using the 'python' quantization method
+#' predictions_log2n <- kKNN::kKNN(
+#'    train = train_data,
+#'    test = test_data,
+#'    train_target = train_labels,
+#'    k = initial_k,
+#'    quantize_method = 'log2n'
 #' )
 #'
 #' # Evaluate the results (e.g., calculate balanced accuracy)
 #' test_labels <- target[-train_index]
-#' bal_acc <- kKNN::balanced_accuracy_score(test_labels, predictions)
-#' cat("Balanced Accuracy:", bal_acc, "\n")
+#' bal_acc_paper <- kKNN::balanced_accuracy_score(test_labels, predictions_paper)
+#' bal_acc_log2n <- kKNN::balanced_accuracy_score(test_labels, predictions_log2n)
+#' cat("Balanced Accuracy (paper Method):", bal_acc_paper, "\n")
+#' cat("Balanced Accuracy (log2n Method):", bal_acc_log2n, "\n")
 #'
 #' @references Levada, A.L.M., Nielsen, F., Haddad, M.F.C. (2024). ADAPTIVE k-NEAREST NEIGHBOR CLASSIFIER BASED ON THE LOCAL ESTIMATION OF THE SHAPE OPERATOR. arXiv:2409.05084.
 #' @export
-kKNN <- function( train, test, train_target, k, func = "log" ) {
+kKNN <- function( train, test, train_target, k, func = "log", quantize_method = "paper" ) {
+  n_train <- nrow( train )
   n_test <- nrow( test )
   labels <- numeric( n_test )
+
+  # Determine the number of quantization levels
+  if ( quantize_method == "paper" ) {
+    n_levels <- 10
+  } else if ( quantize_method == "log2n" ) {
+    n_levels <- round( log2( n_train ) )
+    if ( n_levels %% 2 == 0 ) {
+      n_levels <- n_levels + 1
+    }
+  } else {
+    stop( "Invalid quantization_method. Choose 'paper' or 'log2n'." )
+  }
 
   # Compute curvature for training set
   curvaturas <- curvature_estimation( train, k )
@@ -71,7 +96,7 @@ kKNN <- function( train, test, train_target, k, func = "log" ) {
     }
     curvaturas <- log( curvaturas )
   } else if ( func == "cubic_root" ) {
-    curvaturas <- sign( curvaturas ) * abs( curvaturas )^( 1 / 3 )
+    curvaturas <- sign( curvaturas ) * abs( curvaturas )^(1 / 3 )
   } else if ( func == "sigmoid" ) {
     curvaturas <- sigmoid( curvaturas, 0.5 )
   }
@@ -79,7 +104,7 @@ kKNN <- function( train, test, train_target, k, func = "log" ) {
   # Quantize training set curvatures
   min_curv <- min( curvaturas, na.rm = TRUE )
   max_curv <- max( curvaturas, na.rm = TRUE )
-  disc_curv <- quantize( curvaturas, min_curv, max_curv, k = 10 )
+  disc_curv <- quantize( curvaturas, min_curv, max_curv, k = n_levels )
 
   # Find k-nearest neighbors for the test set
   knn_results <- FNN::get.knnx( train, query = test, k = k, algorithm = "kd_tree" )
@@ -98,12 +123,12 @@ kKNN <- function( train, test, train_target, k, func = "log" ) {
       curvature <- log( curvature )
     } else if ( func == "cubic_root" ) {
       curvature <- sign( curvature ) * abs( curvature )^( 1 / 3 )
-    } else if ( func == "sigmoid") {
+    } else if ( func == "sigmoid" ) {
       curvature <- sigmoid( curvature, 0.5 )
     }
 
     curvaturas_updated <- c( curvaturas, curvature )
-    disc_curv_updated <- quantize( curvaturas_updated, min( curvaturas_updated, na.rm = TRUE ), max( curvaturas_updated, na.rm = TRUE ), k = 10 )
+    disc_curv_updated <- quantize( curvaturas_updated, min( curvaturas_updated, na.rm = TRUE ), max( curvaturas_updated, na.rm = TRUE ), k = n_levels )
     less <- disc_curv_updated[ length( disc_curv_updated ) ]
 
     if ( length( neighs ) > 1 && less < length( neighs ) ) {

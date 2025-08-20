@@ -1,8 +1,0 @@
-# the main functions for the user
-export( kKNN )
-
-# the helper functions
-export( curvature_estimation )
-export( point_curvature_estimation )
-export( quantize )
-export( sigmoid )
