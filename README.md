@@ -61,7 +61,7 @@ if (initial_k %% 2 == 0) {
 }
 
 # Run the kK-NN classifier using the default quantization method ('paper')
-predictions_paper <- kKNN::kKNN(
+predictions_paper <- LCCkNN::kKNN(
    train = train_data,
    test = test_data,
    train_target = train_labels,
@@ -69,7 +69,7 @@ predictions_paper <- kKNN::kKNN(
 )
 
 # Run the kK-NN classifier using the 'log2n' quantization method
-predictions_log2n <- kKNN::kKNN(
+predictions_log2n <- LCCkNN::kKNN(
    train = train_data,
    test = test_data,
    train_target = train_labels,
