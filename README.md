@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-The **kKNN** R package implements an adaptive k-nearest neighbor (k-NN) classifier based on local curvature estimation. Unlike the traditional k-NN algorithm, which uses a fixed number of neighbors ($k$) for all data points, the kK-NN algorithm dynamically adjusts the neighborhood size for each sample.
+The **LCCkNN** R package implements an adaptive k-nearest neighbor (k-NN) classifier based on local curvature estimation. Unlike the traditional k-NN algorithm, which uses a fixed number of neighbors ($k$) for all data points, the kK-NN algorithm dynamically adjusts the neighborhood size for each sample.
 
 The core idea is that data points with low curvature could have larger neighborhoods, as the tangent space approximates well the underlying data shape. Conversely, points with high curvature could have smaller neighborhoods, because the tangent space is a loose approximation. This adaptive strategy is capable of avoiding both underfitting and overfitting, and improves classification performance, especially when dealing with a limited number of training samples. 
 The algorithm's key components include:
@@ -25,15 +25,15 @@ This dual-method support allows users to test and compare both quantization stra
 
 ## 📦 Installation
 
-You can install the `kKNN` package directly from GitHub using `devtools`.
+You can install the `LCCkNN` package directly from GitHub using `devtools`.
 
 ```r
-devtools::install_github("gabrielforest/kKNN")
+devtools::install_github("gabrielforest/LCCkNN")
 ```
 
 ## Usage Example
 
-Here is a quick example of how to use the `kK_NN_classifier` function on the built-in `iris` dataset.
+Here is a quick example of how to use the `kKNN` function on the built-in `iris` dataset.
 
 ```r
 # Load necessary libraries
@@ -79,8 +79,8 @@ predictions_log2n <- kKNN::kKNN(
 
 # Evaluate the results (e.g., calculate balanced accuracy)
 test_labels <- target[-train_index]
-bal_acc_paper <- kKNN::balanced_accuracy_score(test_labels, predictions_paper)
-bal_acc_log2n <- kKNN::balanced_accuracy_score(test_labels, predictions_log2n)
+bal_acc_paper <- LCCkNN::balanced_accuracy_score(test_labels, predictions_paper)
+bal_acc_log2n <- LCCkNN::balanced_accuracy_score(test_labels, predictions_log2n)
 cat("Balanced Accuracy (paper Method):", bal_acc_paper, "\n")
 cat("Balanced Accuracy (log2n Method):", bal_acc_log2n, "\n")
 ```

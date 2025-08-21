@@ -51,15 +51,15 @@ if (initial_k \%\% 2 == 0) {
 }
 
 # Run the kK-NN classifier using the default quantization method ('paper')
-predictions_paper <- kKNN::kKNN(
+predictions_paper <- LCCkNN::kKNN(
    train = train_data,
    test = test_data,
    train_target = train_labels,
    k = initial_k
 )
 
-# Run the kK-NN classifier using the 'python' quantization method
-predictions_log2n <- kKNN::kKNN(
+# Run the kK-NN classifier using the 'log2n' quantization method
+predictions_log2n <- LCCkNN::kKNN(
    train = train_data,
    test = test_data,
    train_target = train_labels,
@@ -69,8 +69,8 @@ predictions_log2n <- kKNN::kKNN(
 
 # Evaluate the results (e.g., calculate balanced accuracy)
 test_labels <- target[-train_index]
-bal_acc_paper <- kKNN::balanced_accuracy_score(test_labels, predictions_paper)
-bal_acc_log2n <- kKNN::balanced_accuracy_score(test_labels, predictions_log2n)
+bal_acc_paper <- LCCkNN::balanced_accuracy_score(test_labels, predictions_paper)
+bal_acc_log2n <- LCCkNN::balanced_accuracy_score(test_labels, predictions_log2n)
 cat("Balanced Accuracy (paper Method):", bal_acc_paper, "\n")
 cat("Balanced Accuracy (log2n Method):", bal_acc_log2n, "\n")
 
