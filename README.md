@@ -25,9 +25,10 @@ This dual-method support allows users to test and compare both quantization stra
 
 ## 📦 Installation
 
-You can install the `LCCkNN` package directly from GitHub using `devtools`.
+You can install the `LCCkNN` package directly from [CRAN](https://cran.r-project.org/web/packages/LCCkNN/index.html) or GitHub using `devtools`.
 
 ```r
+install.packages("LCCkNN") 
 devtools::install_github("gabrielforest/LCCkNN")
 ```
 
